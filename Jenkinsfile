@@ -65,7 +65,7 @@ with app.test_client() as client:
                 --namespace ${NAMESPACE} \
                 --set flask.image.repository=${DOCKERHUB_REPO} \
                 --set flask.image.tag=${BUILD_NUMBER} \
-                --wait --timeout 10m
+                --wait --timeout 5m
                 """
             }
         }
