@@ -25,9 +25,11 @@ pipeline {
                 sh '''
                     pip install flask flask-sqlalchemy psycopg2-binary --quiet
                     python3 -c "
-import sys
+import sys, os
 sys.path.insert(0, 'app')
+os.environ['DATABASE_URL'] = 'sqlite:///:memory:'
 from app import app
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
 with app.test_client() as client:
     response = client.get('/')
     assert response.status_code == 200, 'Home page failed'
