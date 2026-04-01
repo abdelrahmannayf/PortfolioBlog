@@ -5,13 +5,12 @@ pipeline {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-cred')
         DOCKERHUB_USER = 'abdelrahmannayf'
         IMAGE_NAME = 'portfolioblog'
-        IMAGE_TAG = "${BUILD_NUMBER}"
+        IMAGE_TAG = "${env.BUILD_NUMBER}"
         NAMESPACE = 'monitoring'
         HELM_RELEASE = 'portfolio'
     }
 
     stages {
-
         stage('Checkout') {
             steps {
                 echo '📥 Cloning repository...'
@@ -42,45 +41,46 @@ with app.test_client() as client:
         stage('Build Docker Image') {
             steps {
                 echo '🐳 Building Docker image...'
-                sh '''
+                sh """
                     docker build -t ${DOCKERHUB_USER}/${IMAGE_NAME}:${IMAGE_TAG} .
                     docker tag ${DOCKERHUB_USER}/${IMAGE_NAME}:${IMAGE_TAG} ${DOCKERHUB_USER}/${IMAGE_NAME}:latest
-                '''
+                """
             }
         }
 
         stage('Push to DockerHub') {
             steps {
                 echo '📤 Pushing to DockerHub...'
-                sh '''
+                sh """
                     echo ${DOCKERHUB_CREDENTIALS_PSW} | docker login -u ${DOCKERHUB_CREDENTIALS_USR} --password-stdin
                     docker push ${DOCKERHUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}
                     docker push ${DOCKERHUB_USER}/${IMAGE_NAME}:latest
                     docker logout
-                '''
+                """
             }
         }
 
         stage('Deploy with Helm') {
             steps {
                 echo '☸️ Deploying to Kubernetes with Helm...'
-                sh '''
+                // استخدمنا Double Quotes هنا عشان الـ Variables تتفسر صح
+                sh """
                     helm upgrade --install ${HELM_RELEASE} ./portfoliochart \
                         --namespace ${NAMESPACE} \
                         --set flask.image.repository=${DOCKERHUB_USER}/${IMAGE_NAME} \
                         --set flask.image.tag=${IMAGE_TAG} \
-                        --wait --timeout 2m
-                '''
+                        --wait --timeout 5m
+                """
             }
         }
 
         stage('Verify Deployment') {
             steps {
                 echo '✅ Verifying deployment...'
-                sh '''
-                    kubectl get pods -n ${NAMESPACE} | grep portfolio
-                    kubectl rollout status deployment/portfolio-flask -n ${NAMESPACE}
-                '''
+                sh """
+                    kubectl get pods -n ${NAMESPACE} | grep ${HELM_RELEASE}
+                    kubectl rollout status deployment/${HELM_RELEASE}-flask -n ${NAMESPACE}
+                """
             }
         }
     }
