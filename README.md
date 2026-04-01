@@ -1,5 +1,5 @@
 # 🌐 Portfolio Blog — Multi-Tier DevOps Project
-
+![](screenshots/app.png)
 A production-grade multi-tier web application featuring a personal portfolio and blog, built with Flask, PostgreSQL, and Nginx — fully containerized, orchestrated on Kubernetes via Helm, and monitored with Prometheus & Grafana.
 
 ---
@@ -66,7 +66,7 @@ A production-grade multi-tier web application featuring a personal portfolio and
 ---
 
 ## ⚙️ Jenkins Pipeline Stages
-
+![](screenshots/ng.png)
 | # | Stage | Description | Time |
 |---|---|---|---|
 | 1 | **Checkout SCM** | Clone repo from GitHub | ~31s |
@@ -149,7 +149,7 @@ cd PortfolioBlog
 ---
 
 ### 2️⃣ Run Locally with Docker Compose
-
+![](screenshots/com.png)
 ```bash
 docker-compose up --build -d
 ```
@@ -168,7 +168,7 @@ docker push abdelrahmannayf/portfolioblog:latest
 ---
 
 ### 4️⃣ Deploy on Kubernetes with Helm
-
+![](screenshots/n.png)
 ```bash
 kubectl create namespace monitoring
 helm install portfolio ./portfoliochart -n monitoring
@@ -183,7 +183,7 @@ http://NODE_IP:30009
 ---
 
 ### 5️⃣ Monitor with Prometheus + Grafana
-
+![](screenshots/gra.png)
 ```bash
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm install prometheus prometheus-community/kube-prometheus-stack -n monitoring
