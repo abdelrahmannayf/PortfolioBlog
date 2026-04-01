@@ -192,7 +192,7 @@ kubectl port-forward svc/prometheus-grafana -n monitoring 3000:80
 
 Open Grafana: `http://localhost:3000`
 
-Import Dashboard ID: **15760**
+Import Dashboard ID: **305**
 
 ---
 
