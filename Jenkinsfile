@@ -1,8 +1,9 @@
+cat > ~/PortfolioBlog/Jenkinsfile << 'EOF'
 pipeline {
     agent any
 
     environment {
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub-cred')
         DOCKERHUB_USER = 'abdelrahmannayf'
         IMAGE_NAME = 'portfolioblog'
         IMAGE_TAG = "${BUILD_NUMBER}"
@@ -54,6 +55,7 @@ with app.test_client() as client:
                     echo ${DOCKERHUB_CREDENTIALS_PSW} | docker login -u ${DOCKERHUB_CREDENTIALS_USR} --password-stdin
                     docker push ${DOCKERHUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}
                     docker push ${DOCKERHUB_USER}/${IMAGE_NAME}:latest
+                    docker logout
                 '''
             }
         }
@@ -89,8 +91,6 @@ with app.test_client() as client:
         failure {
             echo '❌ Pipeline failed!'
         }
-        always {
-            sh 'docker logout'
-        }
     }
 }
+EOF
