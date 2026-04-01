@@ -1,4 +1,3 @@
-cat > ~/PortfolioBlog/Jenkinsfile << 'EOF'
 pipeline {
     agent any
 
@@ -93,4 +92,3 @@ with app.test_client() as client:
         }
     }
 }
-EOF
