@@ -1,7 +1,8 @@
 replicaCount: 2
 
 flask:
-  image: abdelrahmannayf/portfolioblog
+  image:
+ repository: abdelrahmannayf/portfolioblog
   tag: latest
 
 postgres:
