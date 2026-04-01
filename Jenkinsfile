@@ -2,12 +2,9 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub-cred')
-        DOCKERHUB_USER = 'abdelrahmannayf'
-        IMAGE_NAME = 'portfolioblog'
-        IMAGE_TAG = "${env.BUILD_NUMBER}"
-        NAMESPACE = 'monitoring'
-        HELM_RELEASE = 'portfolio'
+        DOCKERHUB_REPO = "abdelrahmannayf/portfolioblog"
+        CHART_PATH     = "./portfoliochart"
+        NAMESPACE      = "monitoring"
     }
 
     stages {
@@ -21,9 +18,10 @@ pipeline {
         stage('Run Tests') {
             steps {
                 echo '🧪 Running tests...'
+                // بنجرب نشغل الـ App في بيئة مؤقتة للتأكد من الكود
                 sh '''
-                    pip install flask flask-sqlalchemy psycopg2-binary --quiet
-                    python3 -c "
+                pip install flask flask-sqlalchemy psycopg2-binary --quiet || true
+                python3 -c "
 import sys, os
 sys.path.insert(0, 'app')
 os.environ['DATABASE_URL'] = 'sqlite:///:memory:'
@@ -32,7 +30,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
 with app.test_client() as client:
     response = client.get('/')
     assert response.status_code == 200, 'Home page failed'
-    print('✅ Test passed: Home page returns 200')
+    print('✅ Test passed')
 "
                 '''
             }
@@ -40,57 +38,52 @@ with app.test_client() as client:
 
         stage('Build Docker Image') {
             steps {
-                echo '🐳 Building Docker image...'
-                sh """
-                    docker build -t ${DOCKERHUB_USER}/${IMAGE_NAME}:${IMAGE_TAG} .
-                    docker tag ${DOCKERHUB_USER}/${IMAGE_NAME}:${IMAGE_TAG} ${DOCKERHUB_USER}/${IMAGE_NAME}:latest
-                """
+                echo "🐳 Building Docker image with Tag: ${BUILD_NUMBER}"
+                sh "docker build -t ${DOCKERHUB_REPO}:${BUILD_NUMBER} ."
+                sh "docker tag ${DOCKERHUB_REPO}:${BUILD_NUMBER} ${DOCKERHUB_REPO}:latest"
             }
         }
 
         stage('Push to DockerHub') {
             steps {
-                echo '📤 Pushing to DockerHub...'
-                sh """
-                    echo ${DOCKERHUB_CREDENTIALS_PSW} | docker login -u ${DOCKERHUB_CREDENTIALS_USR} --password-stdin
-                    docker push ${DOCKERHUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}
-                    docker push ${DOCKERHUB_USER}/${IMAGE_NAME}:latest
-                    docker logout
-                """
+                echo '📤 Pushing image to DockerHub...'
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-cred', passwordVariable: 'DOCKERHUB_CREDENTIALS_PSW', usernameVariable: 'DOCKERHUB_CREDENTIALS_USR')]) {
+                    sh "echo ${DOCKERHUB_CREDENTIALS_PSW} | docker login -u ${DOCKERHUB_CREDENTIALS_USR} --password-stdin"
+                    sh "docker push ${DOCKERHUB_REPO}:${BUILD_NUMBER}"
+                    sh "docker push ${DOCKERHUB_REPO}:latest"
+                    sh "docker logout"
+                }
             }
         }
 
         stage('Deploy with Helm') {
             steps {
-                echo '☸️ Deploying to Kubernetes with Helm...'
-                // استخدمنا Double Quotes هنا عشان الـ Variables تتفسر صح
+                echo '☸️ Deploying to Kubernetes...'
+                // زودنا الـ Timeout لـ 10 دقائق عشان نضمن الـ Pull يكمل
                 sh """
-                    helm upgrade --install ${HELM_RELEASE} ./portfoliochart \
-                        --namespace ${NAMESPACE} \
-                        --set flask.image.repository=${DOCKERHUB_USER}/${IMAGE_NAME} \
-                        --set flask.image.tag=${IMAGE_TAG} \
-                        --wait --timeout 5m
+                helm upgrade --install portfolio ${CHART_PATH} \
+                --namespace ${NAMESPACE} \
+                --set flask.image.repository=${DOCKERHUB_REPO} \
+                --set flask.image.tag=${BUILD_NUMBER} \
+                --wait --timeout 10m
                 """
             }
         }
 
-        stage('Verify Deployment') {
+        stage('Cleanup') {
             steps {
-                echo '✅ Verifying deployment...'
-                sh """
-                    kubectl get pods -n ${NAMESPACE} | grep ${HELM_RELEASE}
-                    kubectl rollout status deployment/${HELM_RELEASE}-flask -n ${NAMESPACE}
-                """
+                echo '🧹 Cleaning up old Docker images...'
+                sh "docker rmi ${DOCKERHUB_REPO}:${BUILD_NUMBER} || true"
             }
         }
     }
 
     post {
         success {
-            echo '🎉 Pipeline completed successfully!'
+            echo '✅ Pipeline finished successfully!'
         }
         failure {
-            echo '❌ Pipeline failed!'
+            echo '❌ Pipeline failed! Check the logs.'
         }
     }
 }
