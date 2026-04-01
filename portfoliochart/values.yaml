@@ -1,0 +1,20 @@
+replicaCount: 2
+
+flask:
+  image: abdelrahmannayf/portfolioblog
+  tag: latest
+
+postgres:
+  image: postgres
+  tag: "15"
+  user: portfolio
+  password: portfolio123
+  db: portfoliodb
+
+nginx:
+  image: nginx
+  tag: alpine
+
+service:
+  type: NodePort
+  nodePort: 30009

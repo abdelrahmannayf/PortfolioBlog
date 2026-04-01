@@ -1,0 +1,26 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #eee; }
+nav { display: flex; gap: 20px; align-items: center; padding: 16px 40px; background: rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.1); }
+nav a { color: #aaa; text-decoration: none; font-size: 0.95rem; }
+nav a:hover { color: white; }
+.btn-nav { margin-left: auto; background: #6366f1; color: white; padding: 6px 16px; border-radius: 8px; text-decoration: none; font-size: 0.9rem; }
+.hero { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 90vh; text-align: center; padding: 40px; }
+.avatar { font-size: 60px; margin-bottom: 20px; }
+h1 { font-size: 2.8rem; margin-bottom: 8px; }
+.title { color: #a78bfa; font-size: 1.2rem; margin-bottom: 30px; }
+.badges { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 30px; }
+.badges span { background: rgba(167,139,250,0.1); border: 1px solid rgba(167,139,250,0.3); color: #a78bfa; padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; }
+.links { display: flex; gap: 12px; }
+.btn { background: #6366f1; color: white; padding: 10px 24px; border-radius: 10px; text-decoration: none; border: none; cursor: pointer; font-size: 0.95rem; }
+.btn-outline { background: transparent; border: 1px solid rgba(255,255,255,0.3); color: white; padding: 10px 24px; border-radius: 10px; text-decoration: none; font-size: 0.95rem; }
+.container { max-width: 800px; margin: 40px auto; padding: 0 20px; }
+.container h2 { font-size: 1.8rem; margin-bottom: 24px; }
+.card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 24px; margin-bottom: 20px; }
+.card h3 a { color: #a78bfa; text-decoration: none; }
+.card h3 a:hover { text-decoration: underline; }
+.date { color: #666; font-size: 0.85rem; margin: 6px 0 12px; }
+.post-content { line-height: 1.8; margin: 20px 0; }
+form { display: flex; flex-direction: column; gap: 16px; }
+input, textarea { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 12px; border-radius: 10px; font-size: 1rem; font-family: inherit; }
+textarea { min-height: 300px; resize: vertical; }
+input::placeholder, textarea::placeholder { color: #555; }
